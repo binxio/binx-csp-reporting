@@ -1,22 +1,17 @@
-.PHONY: help init clean validate mock create delete info deploy
+.PHONY: help deploy delete merge-swagger lint-swagger lambda-package
 .DEFAULT_GOAL := run
 
-environment = "binx/dev/eu-west-1"
+ENVIRONMENT = "binx/dev/eu-west-1"
+BUCKET_NAME = "binx-csp-provider"
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-create: merge-swagger environments/$(ENVIRONMENT).yaml ## create env
-	@sceptre launch-env $(environment)
+deploy: lambda-package merge-swagger ## create env
+	@sceptre launch-env $(ENVIRONMENT)
 
 delete: ## delete env
-	@sceptre delete-env $(environment)
-
-info: ## describe resources
-	@sceptre describe-env-resources $(environment)
-	@sceptre describe-stack-outputs $(environment) bucket
-
-deploy: delete create info ## delete and create
+	@sceptre delete-env $(ENVIRONMENT)
 
 merge-swagger: lint-swagger ## merged swagger with api gateway
 	@aws-cfn-update \
@@ -29,17 +24,8 @@ merge-swagger: lint-swagger ## merged swagger with api gateway
 lint-swagger: ## lint the swagger.yaml spec
 	openapi-spec-validator --schema 2.0 swagger.yaml
 
-lambda-build-zip: ## create a lambda archive
-	./update_version.sh
-	docker build -t my-lambda .
-
-lambda-dist: lambda-build-zip ## create a new lambda.zip in 'dist' directory
-	mkdir -p dist
-	./copy_from_docker.sh
-	unzip -l dist/lambda.zip
-
-lambda-upload-zip: ## upload lambda.zip to environment needs ENVIRONMENT=st
-	aws s3 cp dist/lambda.zip s3://ocp-lambda-$(ENVIRONMENT)/lambda.zip --profile ocp-$(ENVIRONMENT)
-
-lambda-clean: ## clean artifact
-	-rm -rf dist
+lambda-package:
+	sam package \
+		--template-file sam-templates/postreport.yaml \
+		--output-template-file templates/postreport.yaml \
+		--s3-bucket $(BUCKET_NAME)

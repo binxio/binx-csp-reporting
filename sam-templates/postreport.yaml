@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Post csp report function
+
+Parameters:
+  BucketName:
+    Type: String
+  FunctionName:
+    Type: String
+
+Resources:
+  DeployBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref BucketName
+  PostCSPReport:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: csp_report_indexer.handler
+      Runtime: nodejs6.10
+      CodeUri: !Sub 's3://${BucketName}/${FunctionName}.zip'

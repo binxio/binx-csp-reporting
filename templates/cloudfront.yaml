@@ -1,15 +1,15 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description:
 Resources:
-  DeployBucket:
+  WebsiteBucket:
     Type: AWS::S3::Bucket
     Properties:
       AccessControl: BucketOwnerFullControl
 
-  DeployBucketPolicy:
+  WebsiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref DeployBucket
+      Bucket: !Ref WebsiteBucket
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -18,7 +18,7 @@ Resources:
           Principal: "*"
           Action:
           - "s3:GetObject"
-          Resource: !Sub arn:aws:s3:::${DeployBucket}/*
+          Resource: !Sub arn:aws:s3:::${WebsiteBucket}/*
 
   SecurityHeadersLambdaRole:
     Type: AWS::IAM::Role
@@ -68,7 +68,7 @@ Resources:
         DefaultRootObject: index.html
         Enabled: true
         Origins:
-        - DomainName: !GetAtt DeployBucket.DomainName
+        - DomainName: !GetAtt WebsiteBucket.DomainName
           Id: webpage
           S3OriginConfig:
             OriginAccessIdentity:
