@@ -1,0 +1,5 @@
+boto3
+elasticsearch-curator
+elasticsearch
+requests-aws4auth
+requests

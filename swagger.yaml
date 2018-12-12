@@ -1,0 +1,39 @@
+---
+swagger: '2.0'
+info:
+  title: 'AWS API'
+  version: '1.0.0'
+basePath: '/api'
+schemes:
+- 'https'
+paths:
+  /report:
+    post:
+      consumes:
+      - 'application/json'
+      produces:
+      - 'application/json'
+      responses:
+        '200':
+          description: ''
+          headers:
+            Content-Type:
+              type: string
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+
+    options:
+      responses:
+        '200':
+          description: 'Default response for CORS method'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
