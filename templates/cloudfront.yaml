@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description:
+Description: cloudfront for website with csp header lambda at edge
+
 Resources:
   WebsiteBucket:
     Type: AWS::S3::Bucket
@@ -44,16 +45,24 @@ Resources:
       MemorySize: 128
       Timeout: 3
       Code:
-        ZipFile: "'use strict';\nexports.handler = (event, context, callback) => {\n\
-            \    \n    //Get contents of response\n    const response = event.Records[0].cf.response;\n\
-            \    const headers = response.headers;\n\n//Set new headers \n  headers['content-security-policy-report-only'] = [{key:\
-            \ 'Content-Security-Policy-Report-Only', value: \"default-src 'none'}];\
-            \  \n    \n    //Return modified response\n    callback(null, response);\n};"
+        ZipFile: |-
+            'use strict';
+            exports.handler = (event, context, callback) => {
 
-  SecurityHeadersLambdaV1:
+              //Get contents of response
+              const response = event.Records[0].cf.response;
+              const headers = response.headers;
+
+              //Set new headers
+              headers['content-security-policy-report-only'] = [{key: 'Content-Security-Policy-Report-Only', value: "default-src 'none'"}];
+
+              //Return modified response
+              callback(null, response);
+            };
+  SecurityHeadersLambdaV2:
     Type: AWS::Lambda::Version
     Properties:
-      Description: Version 1 of the security headers lambda
+      Description: Version 2 of the security headers lambda
       FunctionName: !Ref 'SecurityHeadersLambda'
 
   CloudFrontDistribution:
@@ -64,7 +73,10 @@ Resources:
           ForwardedValues:
             QueryString: true
           TargetOriginId: webpage
-          ViewerProtocolPolicy: redirect-to-http
+          ViewerProtocolPolicy: redirect-to-https
+          LambdaFunctionAssociations:
+          - EventType: origin-response
+            LambdaFunctionARN: !Ref SecurityHeadersLambdaV2
         DefaultRootObject: index.html
         Enabled: true
         Origins:
@@ -74,6 +86,3 @@ Resources:
             OriginAccessIdentity:
               Ref: AWS::NoValue
         PriceClass: PriceClass_100
-        LambdaFunctionAssociations:
-        - EventType: origin-response
-          LambdaFunctionARN: !Ref SecurityHeadersLambdaV1

@@ -1,3 +1,2 @@
 project_code: binx-csp-reporting
-profile: {{ environment_path.0 }}
-region: {{ environment_path.2 }}
+profile: binx

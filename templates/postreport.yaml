@@ -1,11 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: 'AWS::Serverless-2016-10-31'
 Description: Post csp report function
-
 Resources:
   PostCSPReport:
-    Type: 'AWS::Serverless::Function'
     Properties:
+      CodeUri: s3://binx-csp-provider/9a05decaf4e51c56cea25f8ca42ed61e
       Handler: csp_report_indexer.handler
       Runtime: nodejs6.10
-      CodeUri:
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31

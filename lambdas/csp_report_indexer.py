@@ -6,7 +6,7 @@ import os
 
 INDEX_NAME = 'csp'
 DOCTYPE = 'report'
-SERVICE='es'
+SERVICE = 'es'
 REGION = os.environ['REGION']
 HOST = os.environ['DOMAIN_ENDPOINT']
 
@@ -46,6 +46,7 @@ def get_es_client(host: str, aws_auth, port=443):
 
 
 def process_csp_report_event(event: dict) -> [dict]:
+    print(f'The raw event =======> $event')
     return event
 
 
