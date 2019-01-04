@@ -1,1 +1,3 @@
 template_path: cloudfront.yaml
+parameters:
+  CSPReportEndpoint: !stack_output binx/eu/postreport.yaml::CSPReportEndpoint

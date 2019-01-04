@@ -53,5 +53,5 @@ def process_csp_report_event(event: dict) -> [dict]:
 def handler(event: dict, _: dict) -> None:
     csp_report = process_csp_report_event(event)
 
-    es = get_es_client(HOST, get_auth(get_credentials(), REGION, SERVICE))
-    index_document(es, get_index_with_date(INDEX_NAME), DOCTYPE, csp_report)
+    # es = get_es_client(HOST, get_auth(get_credentials(), REGION, SERVICE))
+    # index_document(es, get_index_with_date(INDEX_NAME), DOCTYPE, csp_report)

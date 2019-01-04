@@ -1,10 +1,56 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Post csp report function
+Outputs:
+  CSPReportEndpoint:
+    Description: The endpoint for the CSP reporting lambda
+    Value:
+      Fn::Sub: https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com/${RestApi.Stage}
 Resources:
+  EsCluster:
+    Properties:
+      AccessPolicies:
+        Statement:
+        - Action: es:*
+          Effect: Allow
+          Principal:
+            AWS: arn:aws:iam::569769687575:user/kevin
+          Resource: arn:aws:es:eu-west-1:569769687575:domain/test/*
+        Version: '2012-10-17'
+      DomainName: test
+      EBSOptions:
+        EBSEnabled: true
+        Iops: 0
+        VolumeSize: 20
+        VolumeType: gp2
+      ElasticsearchClusterConfig:
+        DedicatedMasterCount: '3'
+        DedicatedMasterEnabled: 'true'
+        DedicatedMasterType: m3.medium.elasticsearch
+        InstanceCount: '2'
+        InstanceType: m3.medium.elasticsearch
+        ZoneAwarenessEnabled: 'true'
+    Type: AWS::Elasticsearch::Domain
   PostCSPReport:
     Properties:
-      CodeUri: s3://binx-csp-provider/9a05decaf4e51c56cea25f8ca42ed61e
+      CodeUri: s3://binx-csp-provider/b9b6ee2a660f9e551312d4664520eb50
+      Environment:
+        Variables:
+          DOMAIN_ENDPOINT:
+            Fn::GetAtt:
+            - EsCluster
+            - DomainEndpoint
+      Events:
+        PostReportEvent:
+          Properties:
+            Method: post
+            Path: /postreport
+            RestApiId: RestApi
+          Type: Api
       Handler: csp_report_indexer.handler
-      Runtime: nodejs6.10
+      Runtime: python3.7
     Type: AWS::Serverless::Function
+  RestApi:
+    Properties:
+      StageName: dev
+    Type: AWS::Serverless::Api
 Transform: AWS::Serverless-2016-10-31
