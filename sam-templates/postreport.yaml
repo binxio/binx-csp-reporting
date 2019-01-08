@@ -2,20 +2,32 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 Description: Post csp report function
 
+Globals:
+  Api:
+    Cors: "'*'"
+
 Resources:
   RestApi:
     Type: 'AWS::Serverless::Api'
     Properties:
       StageName: dev
+  LambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PostCSPReport
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
   PostCSPReport:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: csp_report_indexer.handler
       Runtime: python3.7
+      Timeout: 30
       CodeUri:
       Environment:
         Variables:
           DOMAIN_ENDPOINT: !GetAtt EsCluster.DomainEndpoint
+          REGION: 'eu-west-1'
       Events:
         PostReportEvent:
           Type: Api
@@ -23,31 +35,28 @@ Resources:
             Path: /postreport
             Method: post
             RestApiId: RestApi
+
   EsCluster:
     Type: AWS::Elasticsearch::Domain
     Properties:
-      DomainName: "test"
+      ElasticsearchVersion: '6.3'
       ElasticsearchClusterConfig:
-        DedicatedMasterEnabled: "true"
-        InstanceCount: "2"
-        ZoneAwarenessEnabled: "true"
-        InstanceType: "m3.medium.elasticsearch"
-        DedicatedMasterType: "m3.medium.elasticsearch"
-        DedicatedMasterCount: "3"
+        InstanceCount: '1'
+        InstanceType: 't2.small.elasticsearch'
       EBSOptions:
         EBSEnabled: true
         Iops: 0
         VolumeSize: 20
-        VolumeType: "gp2"
+        VolumeType: 'gp2'
       AccessPolicies:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
         -
-          Effect: "Allow"
+          Effect: 'Allow'
           Principal:
-            AWS: "arn:aws:iam::569769687575:user/kevin"
-          Action: "es:*"
-          Resource: "arn:aws:es:eu-west-1:569769687575:domain/test/*"
+            AWS: 'arn:aws:iam::569769687575:user/kevin'
+          Action: 'es:*'
+          Resource: 'arn:aws:es:eu-west-1:569769687575:domain/test/*'
 
 Outputs:
   CSPReportEndpoint:

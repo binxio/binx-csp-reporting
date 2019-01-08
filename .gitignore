@@ -6,3 +6,4 @@ dist/lambda.zip
 .vimrc
 *.swap
 *.swp
+/.aws-sam/

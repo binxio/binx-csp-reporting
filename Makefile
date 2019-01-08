@@ -1,4 +1,4 @@
-.PHONY: help deploy delete create-bucket lambda-package
+.PHONY: help deploy delete create-bucket build package
 .DEFAULT_GOAL := run
 
 ENVIRONMENT = "binx"
@@ -7,7 +7,7 @@ BUCKET_NAME = "binx-csp-provider"
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-deploy: create-bucket lambda-package ## create env
+deploy: build package
 	@sceptre launch $(ENVIRONMENT)
 
 delete: ## delete env
@@ -16,8 +16,13 @@ delete: ## delete env
 create-bucket:
 	@sceptre launch $(ENVIRONMENT)/eu/bucket.yaml
 
-lambda-package:
+build:
+	sam build \
+		-t sam-templates/postreport.yaml \
+		-m sam-templates/requirements.txt \
+		--use-container
+
+package:
 	sam package \
-		--template-file sam-templates/postreport.yaml \
 		--output-template-file templates/postreport.yaml \
 		--s3-bucket $(BUCKET_NAME)

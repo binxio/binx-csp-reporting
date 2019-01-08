@@ -58,15 +58,15 @@ Resources:
               const headers = response.headers;
 
               //Set new headers
-              headers['content-security-policy-report-only'] = [{key: 'Content-Security-Policy-Report-Only', value: "default-src 'none'; report-uri ${CSPReportEndpoint}/postreport;"}];
+              headers['content-security-policy-report-only'] = [{key: 'Content-Security-Policy-Report-Only', value: "default-src 'none'; report-uri ${CSPReportEndpoint}/postreport"}];
 
               //Return modified response
               callback(null, response);
             };
-  SecurityHeadersLambdaV3:
+  SecurityHeadersLambdaV1:
     Type: AWS::Lambda::Version
     Properties:
-      Description: Version 3 of the security headers lambda
+      Description: Version 1 of the security headers lambda
       FunctionName: !Ref 'SecurityHeadersLambda'
 
   CloudFrontDistribution:
@@ -80,7 +80,7 @@ Resources:
           ViewerProtocolPolicy: redirect-to-https
           LambdaFunctionAssociations:
           - EventType: origin-response
-            LambdaFunctionARN: !Ref SecurityHeadersLambdaV3
+            LambdaFunctionARN: !Ref SecurityHeadersLambdaV1
         DefaultRootObject: index.html
         Enabled: true
         Origins:

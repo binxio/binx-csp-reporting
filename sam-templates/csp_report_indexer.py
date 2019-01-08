@@ -1,4 +1,4 @@
-from elasticsearch import Elasticsearch, RequestsHttpConnection
+from elasticsearch import Elasticsearch, exceptions, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 import boto3
 from datetime import date
@@ -46,12 +46,24 @@ def get_es_client(host: str, aws_auth, port=443):
 
 
 def process_csp_report_event(event: dict) -> [dict]:
-    print(f'The raw event =======> $event')
-    return event
+    return event['body']
 
 
-def handler(event: dict, _: dict) -> None:
+def handler(event, context):
+    print(f'The raw event =======> {event}')
+
     csp_report = process_csp_report_event(event)
 
-    # es = get_es_client(HOST, get_auth(get_credentials(), REGION, SERVICE))
-    # index_document(es, get_index_with_date(INDEX_NAME), DOCTYPE, csp_report)
+    try:
+        es = get_es_client(HOST, get_auth(get_credentials(), REGION, SERVICE))
+        index_document(es, get_index_with_date(INDEX_NAME), DOCTYPE, csp_report)
+
+        return {
+            'statusCode': 200,
+        }
+
+    except exceptions:
+        return {
+            'statusCode': 400,
+            'body': 'Something went wrong'
+        }

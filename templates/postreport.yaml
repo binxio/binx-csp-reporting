@@ -1,5 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Post csp report function
+Globals:
+  Api:
+    Cors: '''*'''
 Outputs:
   CSPReportEndpoint:
     Description: The endpoint for the CSP reporting lambda
@@ -16,29 +19,33 @@ Resources:
             AWS: arn:aws:iam::569769687575:user/kevin
           Resource: arn:aws:es:eu-west-1:569769687575:domain/test/*
         Version: '2012-10-17'
-      DomainName: test
       EBSOptions:
         EBSEnabled: true
         Iops: 0
         VolumeSize: 20
         VolumeType: gp2
       ElasticsearchClusterConfig:
-        DedicatedMasterCount: '3'
-        DedicatedMasterEnabled: 'true'
-        DedicatedMasterType: m3.medium.elasticsearch
-        InstanceCount: '2'
-        InstanceType: m3.medium.elasticsearch
-        ZoneAwarenessEnabled: 'true'
+        InstanceCount: '1'
+        InstanceType: t2.small.elasticsearch
+      ElasticsearchVersion: '6.3'
     Type: AWS::Elasticsearch::Domain
+  LambdaPermission:
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: PostCSPReport
+      Principal: apigateway.amazonaws.com
+    Type: AWS::Lambda::Permission
   PostCSPReport:
     Properties:
-      CodeUri: s3://binx-csp-provider/b9b6ee2a660f9e551312d4664520eb50
+      CodeUri: s3://binx-csp-provider/421d241bce2458ff3476822aa50d37b9
       Environment:
         Variables:
           DOMAIN_ENDPOINT:
             Fn::GetAtt:
             - EsCluster
             - DomainEndpoint
+          REGION: eu-west-1
       Events:
         PostReportEvent:
           Properties:
@@ -48,6 +55,7 @@ Resources:
           Type: Api
       Handler: csp_report_indexer.handler
       Runtime: python3.7
+      Timeout: 30
     Type: AWS::Serverless::Function
   RestApi:
     Properties:
