@@ -1,8 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Post csp report function
-Globals:
-  Api:
-    Cors: '''*'''
 Outputs:
   CSPReportEndpoint:
     Description: The endpoint for the CSP reporting lambda
@@ -38,7 +35,7 @@ Resources:
     Type: AWS::Lambda::Permission
   PostCSPReport:
     Properties:
-      CodeUri: s3://binx-csp-provider/421d241bce2458ff3476822aa50d37b9
+      CodeUri: s3://binx-csp-provider/79b49c6012219f5321e9462b55e4cb99
       Environment:
         Variables:
           DOMAIN_ENDPOINT:
