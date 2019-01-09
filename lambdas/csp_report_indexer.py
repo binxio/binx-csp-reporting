@@ -57,6 +57,7 @@ def handler(event, context):
     print(f'The csp report ====> {csp_report}')
 
     try:
+        print('Sending to Elasticsearch')
         es = get_es_client(HOST, get_auth(get_credentials(), REGION, SERVICE))
         index_document(es, get_index_with_date(INDEX_NAME), DOCTYPE, csp_report)
 

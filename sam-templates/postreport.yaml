@@ -47,12 +47,11 @@ Resources:
       AccessPolicies:
         Version: '2012-10-17'
         Statement:
-        -
-          Effect: 'Allow'
-          Principal:
-            AWS: 'arn:aws:iam::569769687575:user/kevin'
-          Action: 'es:*'
-          Resource: 'arn:aws:es:eu-west-1:569769687575:domain/test/*'
+          - Effect: Allow
+            Principal:
+              AWS: '*'
+            Action: es:*
+            Resource: '*'
 
 Outputs:
   CSPReportEndpoint:

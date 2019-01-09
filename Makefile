@@ -18,8 +18,9 @@ create-bucket:
 
 build:
 	sam build \
+		-s lambdas/ \
 		-t sam-templates/postreport.yaml \
-		-m sam-templates/requirements.txt \
+		-m lambdas/requirements.txt \
 		--use-container
 
 package:

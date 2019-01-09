@@ -13,8 +13,8 @@ Resources:
         - Action: es:*
           Effect: Allow
           Principal:
-            AWS: arn:aws:iam::569769687575:user/kevin
-          Resource: arn:aws:es:eu-west-1:569769687575:domain/test/*
+            AWS: '*'
+          Resource: '*'
         Version: '2012-10-17'
       EBSOptions:
         EBSEnabled: true
@@ -35,7 +35,7 @@ Resources:
     Type: AWS::Lambda::Permission
   PostCSPReport:
     Properties:
-      CodeUri: s3://binx-csp-provider/79b49c6012219f5321e9462b55e4cb99
+      CodeUri: s3://binx-csp-provider/76b0175d7f40adf5f4665b2a1e5b97ae
       Environment:
         Variables:
           DOMAIN_ENDPOINT:
