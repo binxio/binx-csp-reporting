@@ -10,10 +10,10 @@ help:
 deploy: build package
 	@sceptre launch $(ENVIRONMENT)
 
-delete: ## delete env
+delete:
 	@sceptre delete $(ENVIRONMENT)
 
-create-bucket:
+create-bucket:	# creates the bucket to hold the lambda artifacts
 	@sceptre launch $(ENVIRONMENT)/eu/bucket.yaml
 
 build:
