@@ -2,6 +2,8 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: cloudfront for website with csp header lambda at edge
 
 Parameters:
+  WebsiteBucketName:
+    Type: String
   CSPReportEndpoint:
     Type: String
 
@@ -9,6 +11,7 @@ Resources:
   WebsiteBucket:
     Type: AWS::S3::Bucket
     Properties:
+      BucketName: !Ref WebsiteBucketName
       AccessControl: BucketOwnerFullControl
 
   WebsiteBucketPolicy:
@@ -20,9 +23,9 @@ Resources:
         Statement:
         - Sid: PublicReadForGetBucketObjects
           Effect: Allow
-          Principal: "*"
+          Principal: '*'
           Action:
-          - "s3:GetObject"
+          - 's3:GetObject'
           Resource: !Sub arn:aws:s3:::${WebsiteBucket}/*
 
   SecurityHeadersLambdaRole:

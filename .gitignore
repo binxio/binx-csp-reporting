@@ -7,3 +7,4 @@ dist/lambda.zip
 *.swap
 *.swp
 /.aws-sam/
+/templates/postreport.yaml

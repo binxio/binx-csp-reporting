@@ -1,3 +1,4 @@
 template_path: cloudfront.yaml
 parameters:
+  WebsiteBucketName: binx-csp-reporting-website-bucket
   CSPReportEndpoint: !stack_output binx/eu/postreport.yaml::CSPReportEndpoint

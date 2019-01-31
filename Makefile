@@ -3,12 +3,14 @@
 
 ENVIRONMENT = "binx"
 BUCKET_NAME = "binx-csp-provider"
+WEBSITE_BUCKET_NAME = "binx-csp-reporting-website-bucket"
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 deploy: build package
 	@sceptre launch $(ENVIRONMENT)
+	aws s3 cp html/index.html s3://$(WEBSITE_BUCKET_NAME)/index.html
 
 delete:
 	@sceptre delete $(ENVIRONMENT)
