@@ -1,0 +1,3 @@
+template_path: csp-lambda.yaml
+parameters:
+  CSPReportEndpoint: !stack_output binx/eu/postreport.yaml::CSPReportEndpoint

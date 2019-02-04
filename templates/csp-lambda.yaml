@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: csp header lambda at edge
+
+Parameters:
+  CSPReportEndpoint:
+    Type: String
+
+Resources:
+  SecurityHeadersLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+            - edgelambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  SecurityHeadersLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda that inserts security headers at origin response
+      Handler: index.handler
+      Runtime: nodejs6.10
+      Role: !GetAtt 'SecurityHeadersLambdaRole.Arn'
+      MemorySize: 128
+      Timeout: 3
+      Code:
+        ZipFile: !Sub |-
+            'use strict';
+            exports.handler = (event, context, callback) => {
+
+              //Get contents of response
+              const response = event.Records[0].cf.response;
+              const headers = response.headers;
+
+              //Set new headers
+              headers['content-security-policy-report-only'] = [{key: 'Content-Security-Policy-Report-Only', value: "default-src 'none'; report-uri ${CSPReportEndpoint}/postreport"}];
+
+              //Return modified response
+              callback(null, response);
+            };
+
+  SecurityHeadersLambdav1:
+    Type: AWS::Lambda::Version
+    Properties:
+      Description: Version 1 of the security headers lambda
+      FunctionName: !Ref 'SecurityHeadersLambda'
+
+Outputs:
+  SecurityHeadersLambdaV1Arn:
+    Description: 'The arn of the csp lambda at edge version 1'
+    Value: !Ref 'SecurityHeadersLambdav1'

@@ -1,23 +1,23 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: cloudfront for website with csp header lambda at edge
+Description: cloudfront for website usage csp header lambda at edge
 
 Parameters:
   WebsiteBucketName:
     Type: String
-  CSPReportEndpoint:
+  SecurityHeadersLambdaArn:
     Type: String
 
 Resources:
   WebsiteBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Ref WebsiteBucketName
+      BucketName: !Ref 'WebsiteBucketName'
       AccessControl: BucketOwnerFullControl
 
   WebsiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref WebsiteBucket
+      Bucket: !Ref 'WebsiteBucket'
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -26,51 +26,7 @@ Resources:
           Principal: '*'
           Action:
           - 's3:GetObject'
-          Resource: !Sub arn:aws:s3:::${WebsiteBucket}/*
-
-  SecurityHeadersLambdaRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - lambda.amazonaws.com
-            - edgelambda.amazonaws.com
-          Action: sts:AssumeRole
-      ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-
-  SecurityHeadersLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      Description: Lambda that inserts security headers at origin response
-      Handler: index.handler
-      Runtime: nodejs6.10
-      Role: !GetAtt 'SecurityHeadersLambdaRole.Arn'
-      MemorySize: 128
-      Timeout: 3
-      Code:
-        ZipFile: !Sub |-
-            'use strict';
-            exports.handler = (event, context, callback) => {
-
-              //Get contents of response
-              const response = event.Records[0].cf.response;
-              const headers = response.headers;
-
-              //Set new headers
-              headers['content-security-policy-report-only'] = [{key: 'Content-Security-Policy-Report-Only', value: "default-src 'none'; report-uri ${CSPReportEndpoint}/postreport"}];
-
-              //Return modified response
-              callback(null, response);
-            };
-  SecurityHeadersLambdaV1:
-    Type: AWS::Lambda::Version
-    Properties:
-      Description: Version 1 of the security headers lambda
-      FunctionName: !Ref 'SecurityHeadersLambda'
+          Resource: !Sub 'arn:aws:s3:::${WebsiteBucket}/*'
 
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
@@ -83,11 +39,11 @@ Resources:
           ViewerProtocolPolicy: redirect-to-https
           LambdaFunctionAssociations:
           - EventType: origin-response
-            LambdaFunctionARN: !Ref SecurityHeadersLambdaV1
+            LambdaFunctionARN: !Ref 'SecurityHeadersLambdaArn'
         DefaultRootObject: index.html
         Enabled: true
         Origins:
-        - DomainName: !GetAtt WebsiteBucket.DomainName
+        - DomainName: !GetAtt 'WebsiteBucket.DomainName'
           Id: webpage
           S3OriginConfig:
             OriginAccessIdentity:
