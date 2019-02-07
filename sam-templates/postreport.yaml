@@ -31,6 +31,28 @@ Resources:
             Path: /postreport
             Method: post
             RestApiId: RestApi
+      Role: !GetAtt PostReportLambdaRole.Arn
+
+  PostReportLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: 'EsPostAccess'
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+            - Effect: 'Allow'
+              Action: 'es:ESHttpPost'
+              Resource: '*'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 
   EsCluster:
     Type: AWS::Elasticsearch::Domain
@@ -49,8 +71,13 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: '*'
-            Action: es:*
+              AWS: !GetAtt PostReportLambdaRole.Arn
+            Action: 'es:ESHttpPost'
+            Resource: '*'
+          - Effect: Allow
+            Principal:
+              AWS: 'arn:aws:iam::569769687575:user/kevin'
+            Action: 'es:*'
             Resource: '*'
 
 Outputs:

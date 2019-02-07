@@ -18,7 +18,7 @@ Resources:
             - edgelambda.amazonaws.com
           Action: sts:AssumeRole
       ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 
   SecurityHeadersLambda:
     Type: AWS::Lambda::Function

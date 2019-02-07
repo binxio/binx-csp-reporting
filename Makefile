@@ -13,6 +13,8 @@ deploy: build package
 	aws s3 cp html/index.html s3://$(WEBSITE_BUCKET_NAME)/index.html
 
 delete:
+	-aws s3 rm s3://$(BUCKET_NAME) --recursive
+	-aws s3 rm s3://$(WEBSITE_BUCKET_NAME) --recursive
 	@sceptre delete $(ENVIRONMENT)
 
 create-bucket:	# creates the bucket to hold the lambda artifacts
