@@ -31,19 +31,35 @@ Resources:
       Timeout: 3
       Code:
         ZipFile: !Sub |-
-            'use strict';
-            exports.handler = (event, context, callback) => {
+          'use strict';
+          exports.handler = (event, context, callback) => {
 
-              //Get contents of response
-              const response = event.Records[0].cf.response;
-              const headers = response.headers;
+            //Get contents of response
+            const response = event.Records[0].cf.response;
+            const headers = response.headers;
 
-              //Set new headers
-              headers['content-security-policy-report-only'] = [{key: 'Content-Security-Policy-Report-Only', value: "default-src 'none'; report-uri ${CSPReportEndpoint}/postreport"}];
+            //Set new headers
+            headers['strict-transport-security'] = [{key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubdomains; preload'}];
+            headers['content-security-policy-report-only'] = [{key: 'Content-Security-Policy-Report-Only', value: [
+              "default-src https:; ",
+              "script-src 'self' ",
+              "style-src 'self'; ",
+              "img-src 'self' ",
+              "font-src 'self' data:; ",
+              "object-src: 'none'; ",
+              "media-src 'self'; ",
+              "frame-src 'self' ",
+              "report-uri https://${CSPReportEndpoint}/postreport"
+            ].join("")
+            }];
+            headers['x-content-type-options'] = [{key: 'X-Content-Type-Options', value: 'nosniff'}];
+            headers['x-frame-options'] = [{key: 'X-Frame-Options', value: 'DENY'}];
+            headers['x-xss-protection'] = [{key: 'X-XSS-Protection', value: '1; mode=block'}];
+            headers['referrer-policy'] = [{key: 'Referrer-Policy', value: 'same-origin'}];
 
-              //Return modified response
-              callback(null, response);
-            };
+            //Return modified response
+            callback(null, response);
+          };
 
   SecurityHeadersLambdav1:
     Type: AWS::Lambda::Version

@@ -4,7 +4,7 @@ Description: Post csp report function
 
 Resources:
   RestApi:
-    Type: 'AWS::Serverless::Api'
+    Type: AWS::Serverless::Api
     Properties:
       StageName: dev
   LambdaPermission:
@@ -14,7 +14,7 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
   PostCSPReport:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Properties:
       Handler: csp_report_indexer.handler
       Runtime: python3.7
